@@ -1,0 +1,12 @@
+---
+services:
+  autobrr-no-rars:
+    image: ghcr.io/unhelpful7417/autobrr-no-rars:standalone
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+    ports:
+      - 7474:7474
+    user: 1000:1000 # Set to your UID:GID. No reason to run this container as root
+    volumes:
+      - ./autobrr:/config

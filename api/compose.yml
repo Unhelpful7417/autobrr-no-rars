@@ -1,0 +1,13 @@
+---
+services:
+  autobrr-no-rars-api:
+    image: ghcr.io/unhelpful7417/autobrr-no-rars:api
+    restart: unless-stopped
+    environment:
+      - TZ=${TZ}
+      # - serverPort=42069 # Defaults to port 8080
+      # - logLevel=trace # Defaults to "info". See the "--log-level" argument here: https://www.uvicorn.org/settings/#logging
+    ports:
+      - 8080:8080
+    user: 1000:1000 # Set to your UID:GID. No reason to run this container as root
+    init: true # https://docs.docker.com/compose/compose-file/compose-file-v3/#init
