@@ -5,12 +5,12 @@ on:
     branches: [ "main" ]
     paths:
       - "api/Dockerfile"
-      - "api/api.py"
+      - "api/*.go"
   pull_request:
     branches: [ "main" ]
     paths:
       - "api/Dockerfile"
-      - "api/api.py"
+      - "api/*.go"
   workflow_dispatch:
 
 env:
