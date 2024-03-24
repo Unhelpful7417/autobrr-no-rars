@@ -1,28 +1,21 @@
-# Pin base image to version to avoid stability issues
-FROM python:3.11-slim-bookworm
+FROM golang:alpine3.19 AS build
 
-# Install system dependencies
-RUN apt update && apt install -y python3-libtorrent && rm -rf /var/lib/apt/lists/*
-
-# Set variables
-ENV DEBIAN_FRONTEND=noninteractive
-## Helps python find libtorrent so we can import it
-ENV PYTHONPATH=/usr/lib/python3/dist-packages:$PYTHONPATH
-ENV serverPort=8080
-ENV logLevel=info
-
-# Set working directory
 WORKDIR /app
 
-# Copy in python dependencies
-COPY requirements.txt ./
+COPY go.mod go.sum ./
 
-# Install python dependencies
-RUN pip install -r requirements.txt
+RUN go mod download
 
-# Copy in main script
-COPY api.py ./
+COPY *.go ./
 
-# Run the API server
-CMD ["bash", "-c", "uvicorn api:app --host 0.0.0.0 --log-level ${logLevel} --port ${serverPort}"]
-EXPOSE ${serverPort}
+# I would have liked to statically link this binary and run in a scratch base image, but
+# I keep getting "runtime error: invalid memory address or nil pointer dereference". So
+# I'll leave this here in case I figure it out for some reason:
+# RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o /autobrr-no-rars .
+RUN CGO_ENABLED=0 go build -o /autobrr-no-rars .
+
+FROM alpine:3.19
+
+COPY --from=build --chmod=755 "/autobrr-no-rars" "/autobrr-no-rars"
+
+ENTRYPOINT [ "/autobrr-no-rars" ]
