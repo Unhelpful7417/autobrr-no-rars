@@ -36,12 +36,12 @@ func main() {
 	router := gin.Default()
 	router.SetTrustedProxies(nil) // Turn off trusted proxy warning message
 
-	// Define route to handle torrent file download and parsing
-	router.POST("/validate-url", ValidateTorrentByUrl)
+	router.POST("/validate-url/", ValidateTorrentByUrl)   // Feels kind of stupid to serve these functions
+	router.POST("/validate-url", ValidateTorrentByUrl)    // both with and without the trailing slash but
+	router.GET("/healthcheck/", Healthcheck)              // I'm not sure if autobrr follows HTTP301s by
+	router.GET("/healthcheck", Healthcheck)               // default - too lazy to test right now and this works
 	// router.GET("/get-tl-cookies", getTLSessionCookies)
-	router.GET("/healthcheck", Healthcheck)
 
-	// Listen on any address using custom port if set by user, defaulting to port 8080 if not set
 	if serverPortIsSet && serverPortIsValid {
 		serverAddr := fmt.Sprintf("0.0.0.0:%s", serverPort)
 		fmt.Printf("Currently listening on %s\n", serverAddr)

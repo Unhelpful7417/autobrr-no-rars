@@ -6,13 +6,13 @@ You can use the `compose.yml` provided in this folder to quickly set up and star
 
 1. Type: `Webhook`
 2. Name: \<whatever you want>
-3. Host: `http://localhost:8080/validate-url`
+3. Host: `http://localhost:8080/validate-url/`
 4. HTTP Method: `Post`
 5. Headers: none, leave blank
 6. Data (JSON): `{ "url": "{{ .TorrentUrl }}" }`
 7. Expected HTTP status: `200`
 
-**Remember to change the URL in the "Host" field to however you access your container.** If you expose the port on the same host as your autobrr instance, then the `compose.yml` example provided will work. If you use a separate machine or a reverse proxy, then you'll have to update it accordingly. All that matters is that you use the `/validate-url` endpoint. Then hit save. Here's how it should look:
+**Remember to change the URL in the "Host" field to however you access your container.** If you expose the port on the same host as your autobrr instance, then the `compose.yml` example provided will work. If you use a separate machine or a reverse proxy, then you'll have to update it accordingly. All that matters is that you use the `/validate-url/` endpoint. Then hit save. Here's how it should look:
 
 ![Example of filter page](example.png)
 
