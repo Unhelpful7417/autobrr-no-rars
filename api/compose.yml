@@ -5,9 +5,10 @@ services:
     restart: unless-stopped
     environment:
       - TZ=${TZ}
-      # - serverPort=42069 # Defaults to port 8080
-      # - logLevel=trace # Defaults to "info". See the "--log-level" argument here: https://www.uvicorn.org/settings/#logging
+      # - serverPort=12345 # Defaults to port 8080
+      # - tlUsername=bob     # Optional, set these if
+      # - tlPassword=hunter2 # you use TorrentLeech
     ports:
-      - 8080:8080
+      - 8080:8080 # Remember to change this if you set the serverPort variable
     user: 1000:1000 # Set to your UID:GID. No reason to run this container as root
     init: true # https://docs.docker.com/compose/compose-file/compose-file-v3/#init
