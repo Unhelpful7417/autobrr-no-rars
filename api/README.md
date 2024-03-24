@@ -6,7 +6,7 @@ You can use the `compose.yml` provided in this folder to quickly set up and star
 
 1. Type: `Webhook`
 2. Name: \<whatever you want>
-3. Host: `http://localhost:8080/validate-url` (Note the lack of trailing slash here!)
+3. Host: `http://localhost:8080/validate-url`
 4. HTTP Method: `Post`
 5. Headers: none, leave blank
 6. Data (JSON): `{ "url": "{{ .TorrentUrl }}" }`
