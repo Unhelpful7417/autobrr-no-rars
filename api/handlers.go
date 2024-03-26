@@ -191,7 +191,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	
 	// This should never happen
 	c.JSON(http.StatusInternalServerError, gin.H{
-		"msg": "well shit",
+		"msg": "logic failure, user did something unexpected - submit an issue please :)",
 	})
 }
 
