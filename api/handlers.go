@@ -50,20 +50,14 @@ func ValidateTorrentByUrl(c *gin.Context) {
 
 	// Make HEAD request to check length so as not to waste memory
 	if err := CheckContentLength(&client, req.URL, 100000000); err != nil { // 100MB size limit on torrent file
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "content length check failed",
-			"msg": err,
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "content length check failed"})
 		return
 	}
 
 	// Create HTTP request to download .torrent file
 	httpReq, err := http.NewRequest("GET", req.URL, nil)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "could not create GET request",
-			"msg": err,
-		})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "could not create GET request"})
 		return
 	}
 
@@ -74,7 +68,6 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "could not parse url",
 			"url": req.URL,
-			"msg": err,
 		})
 		return
 	}
@@ -104,9 +97,8 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		resp, err := client.PostForm(req.URL, loginTL)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
-				"error": "could not authenticate to site",
+				"error": "could not authenticate to TL",
 				"url": req.URL,
-				"msg": err,
 			})
 			return
 		}
@@ -116,7 +108,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	// Execute request
 	resp, err := client.Do(httpReq)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "error downloading torrent file", "msg": resp.Status})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "error downloading torrent file"})
 		return
 	}
 	defer resp.Body.Close()
