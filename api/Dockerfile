@@ -8,13 +8,11 @@ RUN go mod download
 
 COPY *.go ./
 
-# I would have liked to statically link this binary and run in a scratch base image, but
-# I keep getting "runtime error: invalid memory address or nil pointer dereference". So
-# I'll leave this here in case I figure it out for some reason:
-# RUN CGO_ENABLED=0 go build -ldflags="-w -s" -o /autobrr-no-rars .
-RUN CGO_ENABLED=0 go build -o /autobrr-no-rars .
+RUN go build -o /autobrr-no-rars .
 
-FROM alpine:3.19
+# This base image contains CA certificates we need for outbound HTTPS requests
+# https://github.com/GoogleContainerTools/distroless/blob/main/base/README.md
+FROM gcr.io/distroless/static
 
 COPY --from=build --chmod=755 "/autobrr-no-rars" "/autobrr-no-rars"
 
