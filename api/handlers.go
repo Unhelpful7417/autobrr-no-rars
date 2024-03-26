@@ -45,6 +45,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 			"error": "url does not point to a .torrent file",
 			"url": req.URL,
 		})
+		return
 	}
 
 	// Make HEAD request to check length so as not to waste memory
@@ -53,6 +54,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 			"error": "content length check failed",
 			"msg": err,
 		})
+		return
 	}
 
 	// Create HTTP request to download .torrent file
@@ -62,6 +64,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 			"error": "could not create GET request",
 			"msg": err,
 		})
+		return
 	}
 
 
@@ -73,6 +76,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 			"url": req.URL,
 			"msg": err,
 		})
+		return
 	}
 	
 	// Need to log in to TorrentLeech to download valid torrent files. If we don't yet have session cookies from TL, then
