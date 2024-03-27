@@ -59,14 +59,14 @@ func CheckEnv(env string) (value string, isSet bool) {
 // CheckContentLength makes a HEAD request to the provided URL, gets the Content-Length from the response,
 // and compares it to the maximum length allowed. One of two possible error values may be returned if the
 // HEAD request cannot be completed or if the content length of the resource at the given URL exceeds the tolerance.
-func CheckContentLength(client *http.Client, url string, maxLength int64) (err error) {
+func CheckContentLength(client *http.Client, url string, maxLengthInBytes int64) (err error) {
 	// Make HEAD request and check length to not fuck up memory
 	headResp, err := client.Head(url)
 	if err != nil {
 		return fmt.Errorf("could not complete HEAD request. error: %v", err)
 	}
-	if headResp.ContentLength > maxLength {
-		return fmt.Errorf("content-length of %v exceeds permitted length of %v", headResp.ContentLength, maxLength)
+	if headResp.ContentLength > maxLengthInBytes {
+		return fmt.Errorf("content-length of %v exceeds permitted length of %v", headResp.ContentLength, maxLengthInBytes)
 	}
 	return nil
 }
