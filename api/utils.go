@@ -15,19 +15,19 @@ import (
 // IsValidUrl ensures that a string is a valid URL. Shamelessly stolen from
 // https://stackoverflow.com/questions/31480710/validate-url-with-standard-package-in-go.
 func IsValidUrl(str string) bool {
-    u, err := url.Parse(str)
-    return err == nil && u.Scheme != "" && u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
+	u, err := url.Parse(str)
+	return err == nil && u.Scheme != "" && u.Host != "" && (u.Scheme == "http" || u.Scheme == "https")
 }
 
 // IsTorrentFile checks if the inputted URL points to a .torrent file after cutting off URL parameters.
 func IsTorrentFile(url string) bool {
-    trimUrlIndex := strings.Index(url, "?")
-    var baseUrl string
-    if trimUrlIndex != -1 {
-        baseUrl = url[:trimUrlIndex]
-    } else {
-        baseUrl = url
-    }
+	trimUrlIndex := strings.Index(url, "?")
+	var baseUrl string
+	if trimUrlIndex != -1 {
+		baseUrl = url[:trimUrlIndex]
+	} else {
+		baseUrl = url
+	}
 
 	return strings.HasSuffix(baseUrl, ".torrent")
 }
@@ -99,13 +99,13 @@ func GetFilesFromTorrentInfo(info metainfo.Info) (fileNames []string) {
 // GetRarFiles searches for strings that look like .rar files or .rar archives,
 // i.e., anything like ".rar" or ".r00".
 func GetRarFiles(fileNames []string) (rarFileNames []string) {
-    // Iterate over each string in the slice
-    for _, file := range fileNames {
-        // Check if the string matches the pattern
-        // if re.MatchString(file) || strings.HasSuffix(file, ".rar") {
-        if strings.HasSuffix(file, ".rar") {
-            rarFileNames = append(rarFileNames, file)
-        }
-    }
+	// Iterate over each string in the slice
+	for _, file := range fileNames {
+		// Check if the string matches the pattern
+		// if re.MatchString(file) || strings.HasSuffix(file, ".rar") {
+		if strings.HasSuffix(file, ".rar") {
+			rarFileNames = append(rarFileNames, file)
+		}
+	}
 	return rarFileNames
 }
