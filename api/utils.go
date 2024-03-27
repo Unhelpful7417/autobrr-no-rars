@@ -6,7 +6,6 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -100,12 +99,6 @@ func GetFilesFromTorrentInfo(info metainfo.Info) (fileNames []string) {
 // GetRarFiles searches for strings that look like .rar files or .rar archives,
 // i.e., anything like ".rar" or ".r00".
 func GetRarFiles(fileNames []string) (rarFileNames []string) {
-    // Define the regular expression pattern
-    pattern := `\.r\d{2}$`
-
-    // Compile the regular expression
-    re := regexp.MustCompile(pattern)
-	_ = re
     // Iterate over each string in the slice
     for _, file := range fileNames {
         // Check if the string matches the pattern
