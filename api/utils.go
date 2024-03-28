@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/cookiejar"
@@ -8,6 +9,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/anacrolix/torrent/metainfo"
 )
@@ -108,4 +110,41 @@ func GetRarFiles(fileNames []string) (rarFileNames []string) {
 		}
 	}
 	return rarFileNames
+}
+
+// assertToString ensures that the input can be asserted into a string.
+func assertToString(input interface{}) (string, error) {
+	if str, ok := input.(string); ok {
+		return str, nil
+	}
+	return "", fmt.Errorf("%v cannot be asserted to a string", input)
+}
+
+// assertToValidInt ensures that the input can be asserted into an integer between 0 and 255.
+func assertToValidInt(input interface{}) (int, error) {
+	if input == nil {
+		return 0, nil
+	}
+	switch num := input.(type) {
+	case int:
+		if num >= 0 && num <= 255 {
+			return num, nil
+		}
+	case float64:
+		intNum := int(num)
+		if intNum >= 0 && intNum <= 255 {
+			return intNum, nil
+		}
+	}
+	return 0, fmt.Errorf("input cannot be asserted to an integer between 0 and 255")
+}
+
+// Returns the log entry that occurs when starting the application
+func initMsg(port string) string {
+	msg := map[string]interface{}{
+		"init": "running on port " + port,
+		"timestamp": time.Now().Unix(),
+	}
+	output, _ := json.Marshal(msg)
+	return string(output)
 }
