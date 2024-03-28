@@ -55,14 +55,17 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		return
 	}
 
-	// Trim off extra URL parameters and make sure we're trying to download a torrent file
-	if !IsTorrentFile(reqUrl) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "url does not point to a .torrent file",
-			"url": reqUrl,
-		})
-		return
-	}
+	// // Trim off extra URL parameters and make sure we're trying to download a torrent file
+	// * I noticed AR uses PHP so download links don't point to a single file, but a .php file with parameters.
+	// * I was trying to make sure this application doesn't download junk/useless data but I'm not really sure this is even necessary
+	// ? Remove
+	// if !IsTorrentFile(reqUrl) {
+	// 	c.JSON(http.StatusBadRequest, gin.H{
+	// 		"error": "url does not point to a .torrent file",
+	// 		"url": reqUrl,
+	// 	})
+	// 	return
+	// }
 
 	// Make HEAD request to check length so as not to waste memory
 	if err := CheckContentLength(&client, reqUrl, 100000000); err != nil { // 100MB size limit on torrent file
