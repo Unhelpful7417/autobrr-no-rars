@@ -3,8 +3,8 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -99,11 +99,11 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		// Get username and password from environment variables
 		tlUsername, isSet := CheckEnv("tlUsername")
 		if !isSet {
-			log.Printf("ERROR: environment variable tlUsername not set, cannot check torrent at %v\n", reqUrl)
+			fmt.Println(tlVarErrMsg("tlUsername", reqUrl))
 		}
 		tlPassword, isSet := CheckEnv("tlPassword")
 		if !isSet {
-			log.Printf("ERROR: environment variable tlPassword not set, cannot check torrent at %v\n", reqUrl)
+			fmt.Println(tlVarErrMsg("tlPassword", reqUrl))
 		}
 		loginTL := url.Values{
 			"username": {tlUsername},

@@ -148,3 +148,14 @@ func initMsg(port string) string {
 	output, _ := json.Marshal(msg)
 	return string(output)
 }
+
+// environment variable tlUsername not set, cannot check torrent at %v\n"
+func tlVarErrMsg(varName string, url string) string {
+	msg := map[string]interface{}{
+		"error": "enironment variable " + varName + " not set, cannot check torrent",
+		"url": url,
+		"timestamp": time.Now().Unix(),
+	}
+	output, _ := json.Marshal(msg)
+	return string(output)
+}
