@@ -142,15 +142,17 @@ func ValidateTorrentByUrl(c *gin.Context) {
 
 	// Parse the downloaded .torrent file from memory
 	mi, err := metainfo.Load(bytes.NewReader(fileBuf.Bytes()))
-	// Do some unique error handling for TorrentLeech since there's some unique jank with them. When downloading a torrent from them without
-	// authentication, their server will still provide a torrent file but it's invalid - when trying to parse it, will return an error like:
+	// Do some unique error handling for private trackers (so far, TL and AR) since
+	// there's some unique jank with them. When downloading a torrent from them without
+	// authentication, their server will still provide a torrent file but it's invalid.
+	// When trying to parse it, will return an error like:
 	// bencode: syntax error (offset: 0): unknown value type '\u003c'
-	// To provide the user with a helpful error, we check if we get a bencode syntax error from TL. If so, then
-	// assume it's due to an unauthenticated request because the user did not provide valid credentials.
+	// To provide the user with a helpful error, we check if we get a bencode syntax error.
+	// If so, then assume it's due to an unauthenticated request because the user did not provide valid credentials.
 	var e *bencode.SyntaxError
-	if err != nil && torrentIsFromTL && errors.As(err, &e) {
+	if err != nil && errors.As(err, &e) {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "torrentleech credentials invalid",
+			"error": "torrent file downloaded was invalid. likely cause was invalid private tracker credentials",
 		})
 		return
 	}
