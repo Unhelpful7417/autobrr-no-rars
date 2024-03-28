@@ -44,10 +44,10 @@ func main() {
 
 	if serverPortIsSet && serverPortIsValid {
 		serverAddr := fmt.Sprintf("0.0.0.0:%s", serverPort)
-		fmt.Printf("Currently listening on %s\n", serverAddr)
+		fmt.Println(initMsg(serverPort))
 		router.Run(serverAddr)
 	} else {
-		fmt.Println("Currently listening on 0.0.0.0:8080")
+		fmt.Println(initMsg("8080"))
 		router.Run("0.0.0.0:8080")
 	}
 }
