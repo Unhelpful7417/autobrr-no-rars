@@ -18,7 +18,7 @@ type InitialRequest struct {
 
 // Fields that are common to all responses
 type CommonResponse struct {
-	Timestamp  int64   `json:"timestamp"`
+	Timestamp  string   `json:"timestamp"`
 	Status     int     `json:"status"`
 	Method     string  `json:"method"`
 	Path       string  `json:"path"`
@@ -44,7 +44,7 @@ func customLogger() gin.HandlerFunc {
 
 		var response interface{}
 		common := CommonResponse{
-			Timestamp: time.Now().Unix(),
+			Timestamp: time.Now().Format(time.RFC3339),
 			Status:    c.Writer.Status(),
 			Method:    c.Request.Method,
 			Path:      c.Request.URL.Path,
@@ -70,7 +70,7 @@ func customLogger() gin.HandlerFunc {
 			msg := map[string]interface{}{
 				"server_error": "error marshaling log data",
 				"msg":          err,
-				"timestamp":    time.Now().Unix(),
+				"timestamp":    time.Now().Format(time.RFC3339),
 			}
 			output, _ := json.Marshal(msg)
 			fmt.Println(string(output))

@@ -143,7 +143,7 @@ func assertToValidInt(input interface{}) (int, error) {
 func initMsg(port string) string {
 	msg := map[string]interface{}{
 		"init": "running on port " + port,
-		"timestamp": time.Now().Unix(),
+		"timestamp": time.Now().Format(time.RFC3339),
 	}
 	output, _ := json.Marshal(msg)
 	return string(output)
@@ -154,7 +154,7 @@ func tlVarErrMsg(varName string, url string) string {
 	msg := map[string]interface{}{
 		"error": "enironment variable " + varName + " not set, cannot check torrent",
 		"url": url,
-		"timestamp": time.Now().Unix(),
+		"timestamp": time.Now().Format(time.RFC3339),
 	}
 	output, _ := json.Marshal(msg)
 	return string(output)
