@@ -14,48 +14,64 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Dictates the expected structure of the request payload from the user
-type TorrentRequest struct {
-	URL string `json:"url"`
-	Tolerance uint8 `json:"tolerance,omitempty"` // Declare as uint8 to do lazy data validation
-}
-
+// Ensures a URL submitted by the user points to a .torrent file that does not contain .rar files
 func ValidateTorrentByUrl(c *gin.Context) {
-	var req TorrentRequest
-	// Parse and validate request body
-	if err := c.ShouldBindJSON(&req); err != nil {
+	// Ensure data from user is JSON
+	var init InitialRequest
+	if err := c.ShouldBindJSON(&init); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid request structure. make sure url is valid and tolerance is between 0-255",
+			"error": "invalid request schema",
+			"msg": err.Error(),
+		})
+		return
+	}
+	c.Keys["url"] = init.URL
+	c.Keys["tolerance"] = init.Tolerance
+
+	// Ensure data from the user can be parsed
+	reqUrl, err := assertToString(c.Keys["url"])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid url value",
+			"url": c.Keys["url"],
+		})
+		return
+	}
+	reqTolerance, err := assertToValidInt(c.Keys["tolerance"])
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "invalid tolerance value, should be 0-255",
+			"tolerance": c.Keys["tolerance"],
 		})
 		return
 	}
 
 	// Check if user has submitted a valid URL
-	if !IsValidUrl(req.URL) {
+	if !IsValidUrl(reqUrl) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid url",
-			"url": req.URL,
+			"url": reqUrl,
 		})
 		return
 	}
 
-    // Trim off extra URL parameters and make sure we're trying to download a torrent file
-	if !IsTorrentFile(req.URL) {
+	// Trim off extra URL parameters and make sure we're trying to download a torrent file
+	if !IsTorrentFile(reqUrl) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "url does not point to a .torrent file",
-			"url": req.URL,
+			"url": reqUrl,
 		})
 		return
 	}
 
 	// Make HEAD request to check length so as not to waste memory
-	if err := CheckContentLength(&client, req.URL, 100000000); err != nil { // 100MB size limit on torrent file
+	if err := CheckContentLength(&client, reqUrl, 100000000); err != nil { // 100MB size limit on torrent file
 		c.JSON(http.StatusBadRequest, gin.H{"error": "content length check failed"})
 		return
 	}
 
 	// Create HTTP request to download .torrent file
-	httpReq, err := http.NewRequest("GET", req.URL, nil)
+	httpReq, err := http.NewRequest("GET", reqUrl, nil)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "could not create GET request"})
 		return
@@ -63,11 +79,11 @@ func ValidateTorrentByUrl(c *gin.Context) {
 
 
 	// Check if torrent file is on TL
-	urlcheck, err := url.Parse(req.URL)
+	urlcheck, err := url.Parse(reqUrl)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "could not parse url",
-			"url": req.URL,
+			"url": reqUrl,
 		})
 		return
 	}
@@ -80,11 +96,11 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		// Get username and password from environment variables
 		tlUsername, isSet := CheckEnv("tlUsername")
 		if !isSet {
-			log.Printf("ERROR: environment variable tlUsername not set, cannot check torrent at %v\n", req.URL)
+			log.Printf("ERROR: environment variable tlUsername not set, cannot check torrent at %v\n", reqUrl)
 		}
 		tlPassword, isSet := CheckEnv("tlPassword")
 		if !isSet {
-			log.Printf("ERROR: environment variable tlPassword not set, cannot check torrent at %v\n", req.URL)
+			log.Printf("ERROR: environment variable tlPassword not set, cannot check torrent at %v\n", reqUrl)
 		}
 		loginTL := url.Values{
 			"username": {tlUsername},
@@ -94,11 +110,11 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		// Submit a simple POST request to the landing page to get some session cookies. Since we're
 		// using the http.client/cookie jar declared with global scope, the cookies are saved globally.
 		// This limits the number of authentication requests we send to TL and makes us less spammy
-		resp, err := client.PostForm(req.URL, loginTL)
+		resp, err := client.PostForm(reqUrl, loginTL)
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "could not authenticate to TL",
-				"url": req.URL,
+				"url": reqUrl,
 			})
 			return
 		}
@@ -114,15 +130,15 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	defer resp.Body.Close()
 
 	// Read the downloaded .torrent file into memory
-	var buf bytes.Buffer
-	_, err = io.Copy(&buf, resp.Body)
+	var fileBuf bytes.Buffer
+	_, err = io.Copy(&fileBuf, resp.Body)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "error reading torrent file"})
 		return
 	}
 
 	// Parse the downloaded .torrent file from memory
-	mi, err := metainfo.Load(bytes.NewReader(buf.Bytes()))
+	mi, err := metainfo.Load(bytes.NewReader(fileBuf.Bytes()))
 	// Do some unique error handling for TorrentLeech since there's some unique jank with them. When downloading a torrent from them without
 	// authentication, their server will still provide a torrent file but it's invalid - when trying to parse it, will return an error like:
 	// bencode: syntax error (offset: 0): unknown value type '\u003c'
@@ -152,30 +168,31 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	fileNames := GetFilesFromTorrentInfo(info)
 	// Filter to find ones that look like .rar archive files
 	rarFileNames := GetRarFiles(fileNames)
+	c.Keys["rar_count"] = len(rarFileNames)
 
 	// Perform final check for .rar files
 	if len(rarFileNames) == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "torrent is free of rar archives",
-			"url": req.URL,
-			"tolerance": req.Tolerance,
+			"url": reqUrl,
+			"tolerance": reqTolerance,
 		})
 		return
 	}
-	if len(rarFileNames) > int(req.Tolerance) && req.Tolerance == 0 {
+	if len(rarFileNames) > int(reqTolerance) && reqTolerance == 0 {
 		c.JSON(http.StatusTeapot, gin.H{
 			"msg": "rar files found in torrent metadata",
-			"url": req.URL,
-			"tolerance": req.Tolerance,
+			"url": reqUrl,
+			"tolerance": reqTolerance,
 			"rar_files": rarFileNames,
 		})
 		return
 	}
-	if len(rarFileNames) <= int(req.Tolerance) && req.Tolerance != 0 {
+	if len(rarFileNames) <= int(reqTolerance) && reqTolerance != 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"msg": "rar files were found but count within tolerance",
-			"url": req.URL,
-			"tolerance": req.Tolerance,
+			"url": reqUrl,
+			"tolerance": reqTolerance,
 			"rar_files": rarFileNames,
 		})
 		return

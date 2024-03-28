@@ -33,7 +33,10 @@ func init() {
 func main() {
 	// Initialize Gin router
 	gin.SetMode(gin.ReleaseMode) // Turn off release mode warning message
-	router := gin.Default()
+	router := gin.New()
+	router.Use(customLogger())
+	router.Use(gin.Recovery()) // Might come to regret printing stack traces to stdout, but we'll see
+
 	router.SetTrustedProxies(nil) // Turn off trusted proxy warning message
 
 	router.POST("/validate-url/", ValidateTorrentByUrl)   // Feels kind of stupid to serve these functions
