@@ -16,14 +16,21 @@ You can use the `compose.yml` provided in this folder to quickly set up and star
 
 ![Example of filter page](example.png)
 
-### Allow some `.rar` files
-By default, the API will check the torrent file for any `.rar` files and return an error if it finds one. But if for some reason you want to permit a certain number of rar files, such as if you expect the sample is rar'd but not the content, then you can set a threshold for how many `.rar` files you are willing to tolerate. If you want to block a release with two `.rar` files but not one, then you would change the "Data (JSON)" field to `{ "url": "{{ .TorrentUrl }}", "tolerance": 1 }`. The value of the "tolerance" field is the maximum number of `.rar` files you will accept in a `.torrent` file. Allowed values are 0-255.
+## Configuration / Troubleshooting
+Logs will be printed to STDOUT in JSON format, except if an uncaught exception occurs (which hopefully shouldn't).
+
+### Customize server port
+Simply set the `serverPort` environment variable to a valid port number. Check the logs if you're having trouble with this.
 
 ### TorrentLeech authentication
 If you're going to be downloading torrents from TorrentLeech, you'll need to give the application your site username and password. Set the `tlUsername` and `tlPassword` environment variables to allow the application to validate torrents from TorrentLeech.
 
-### Customize server port
-Simply set the `serverPort` environment variable to a valid port number. Check the logs if you're having trouble with this.
+### Allow some `.rar` files
+By default, the API will check the torrent file for any `.rar` files and return an error if it finds one. But if for some reason you want to permit a certain number of rar files, such as if you expect the sample is rar'd but not the content, then you can set a threshold for how many `.rar` files you are willing to tolerate. If you want to block a release with two `.rar` files but not one, then you would change the "Data (JSON)" field to:
+```
+{ "url": "{{ .TorrentUrl }}", "tolerance": 1 }
+```
+The value of the "tolerance" field is the maximum number of `.rar` files you will accept in a `.torrent` file. Allowed values are 0-255.
 
 ## How it works
 The "Data (JSON)" you configured will send the URL of the `.torrent` file that Autobrr wants to process. The API will receive that torrent file and try to download it after doing some validation to ensure the URL is accessible and that it points to a `.torrent` file. Once it's downloaded, the API will check the metadata of the torrent for any files that end in `.rar`. If it finds more `.rar` files than the tolerance (which defaults to zero), then it returns an HTTP 418.
