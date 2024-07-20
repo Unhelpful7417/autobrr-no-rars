@@ -12,26 +12,26 @@ import (
 // user submits data that is valid JSON but not valid within the scope of the
 // application, we want to return that data in the logs to ease the debugging process.
 type InitialRequest struct {
-	URL interface{}
+	URL       interface{}
 	Tolerance interface{}
 }
 
 // Fields that are common to all responses
 type CommonResponse struct {
-	Timestamp  string   `json:"timestamp"`
-	Status     int     `json:"status"`
-	Method     string  `json:"method"`
-	Path       string  `json:"path"`
-	Ip         string  `json:"ip"`
-	Latency    int64   `json:"latency"`
+	Timestamp string `json:"timestamp"`
+	Status    int    `json:"status"`
+	Method    string `json:"method"`
+	Path      string `json:"path"`
+	Ip        string `json:"ip"`
+	Latency   int64  `json:"latency"`
 }
 
 // Fields that are specific to the ValidateTorrentByUrl handler function
 type ValidatorResponse struct {
 	CommonResponse
-	Url        interface{}  `json:"url"`
-	Tolerance  interface{}  `json:"tolerance"`
-	RarCount   interface{}  `json:"rar_count"`
+	Url       interface{} `json:"url"`
+	Tolerance interface{} `json:"tolerance"`
+	RarCount  interface{} `json:"rar_count"`
 }
 
 func customLogger() gin.HandlerFunc {
@@ -57,9 +57,9 @@ func customLogger() gin.HandlerFunc {
 		if len(c.Keys) != 0 {
 			response = ValidatorResponse{
 				CommonResponse: common,
-				Url: c.Keys["url"],
-				Tolerance: c.Keys["tolerance"],
-				RarCount: c.Keys["rar_count"],
+				Url:            c.Keys["url"],
+				Tolerance:      c.Keys["tolerance"],
+				RarCount:       c.Keys["rar_count"],
 			}
 		} else {
 			response = common
@@ -80,4 +80,3 @@ func customLogger() gin.HandlerFunc {
 		fmt.Println(string(responseJson))
 	}
 }
-

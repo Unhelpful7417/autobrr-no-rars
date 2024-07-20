@@ -21,7 +21,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	if err := c.ShouldBindJSON(&init); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid request schema",
-			"msg": err.Error(),
+			"msg":   err.Error(),
 		})
 		return
 	}
@@ -33,14 +33,14 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid url value",
-			"url": c.Keys["url"],
+			"url":   c.Keys["url"],
 		})
 		return
 	}
 	reqTolerance, err := assertToValidInt(c.Keys["tolerance"])
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": "invalid tolerance value, should be 0-255",
+			"error":     "invalid tolerance value, should be 0-255",
 			"tolerance": c.Keys["tolerance"],
 		})
 		return
@@ -50,7 +50,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	if !IsValidUrl(reqUrl) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "invalid url",
-			"url": reqUrl,
+			"url":   reqUrl,
 		})
 		return
 	}
@@ -80,20 +80,19 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		return
 	}
 
-
 	// Check if torrent file is on TL
 	urlcheck, err := url.Parse(reqUrl)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "could not parse url",
-			"url": reqUrl,
+			"url":   reqUrl,
 		})
 		return
 	}
-	
+
 	// Need to log in to TorrentLeech to download valid torrent files. If we don't yet have session cookies from TL, then
 	// we POST the username and password to the landing page to get session cookies. These cookies are saved between runs
-	// of this function, so if we already have a session cookie for TL then we ignore this check and use the cookie jar. 
+	// of this function, so if we already have a session cookie for TL then we ignore this check and use the cookie jar.
 	torrentIsFromTL := strings.HasSuffix(urlcheck.Hostname(), "torrentleech.org")
 	if torrentIsFromTL && !CheckIfTLCookiesExist(jar) {
 		// Get username and password from environment variables
@@ -117,7 +116,7 @@ func ValidateTorrentByUrl(c *gin.Context) {
 		if err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": "could not authenticate to TL",
-				"url": reqUrl,
+				"url":   reqUrl,
 			})
 			return
 		}
@@ -178,16 +177,16 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	// Perform final check for .rar files
 	if len(rarFileNames) == 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "torrent is free of rar archives",
-			"url": reqUrl,
+			"msg":       "torrent is free of rar archives",
+			"url":       reqUrl,
 			"tolerance": reqTolerance,
 		})
 		return
 	}
 	if len(rarFileNames) > int(reqTolerance) && reqTolerance == 0 {
 		c.JSON(http.StatusTeapot, gin.H{
-			"msg": "rar files found in torrent metadata",
-			"url": reqUrl,
+			"msg":       "rar files found in torrent metadata",
+			"url":       reqUrl,
 			"tolerance": reqTolerance,
 			"rar_files": rarFileNames,
 		})
@@ -195,14 +194,14 @@ func ValidateTorrentByUrl(c *gin.Context) {
 	}
 	if len(rarFileNames) <= int(reqTolerance) && reqTolerance != 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"msg": "rar files were found but count within tolerance",
-			"url": reqUrl,
+			"msg":       "rar files were found but count within tolerance",
+			"url":       reqUrl,
 			"tolerance": reqTolerance,
 			"rar_files": rarFileNames,
 		})
 		return
 	}
-	
+
 	// This should never happen
 	c.JSON(http.StatusInternalServerError, gin.H{
 		"msg": "logic failure, user did something unexpected - submit an issue please :)",

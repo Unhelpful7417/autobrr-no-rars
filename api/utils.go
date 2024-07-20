@@ -87,7 +87,7 @@ func CheckIfTLCookiesExist(jar *cookiejar.Jar) bool {
 func GetFilesFromTorrentInfo(info metainfo.Info) (fileNames []string) {
 	if len(info.Files) > 0 {
 		for _, file := range info.Files {
-			pathList := file.Path // Get full file path like {"folder", "file.txt"}
+			pathList := file.Path                 // Get full file path like {"folder", "file.txt"}
 			fileName := pathList[len(pathList)-1] // Get just file name
 			fileNames = append(fileNames, fileName)
 		}
@@ -142,7 +142,7 @@ func assertToValidInt(input interface{}) (int, error) {
 // Returns the log entry that occurs when starting the application
 func initMsg(port string) string {
 	msg := map[string]interface{}{
-		"init": "running on port " + port,
+		"init":      "running on port " + port,
 		"timestamp": time.Now().Format(time.RFC3339),
 	}
 	output, _ := json.Marshal(msg)
@@ -152,8 +152,8 @@ func initMsg(port string) string {
 // environment variable tlUsername not set, cannot check torrent at %v\n"
 func tlVarErrMsg(varName string, url string) string {
 	msg := map[string]interface{}{
-		"error": "enironment variable " + varName + " not set, cannot check torrent",
-		"url": url,
+		"error":     "enironment variable " + varName + " not set, cannot check torrent",
+		"url":       url,
 		"timestamp": time.Now().Format(time.RFC3339),
 	}
 	output, _ := json.Marshal(msg)

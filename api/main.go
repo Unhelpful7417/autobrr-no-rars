@@ -11,12 +11,12 @@ import (
 )
 
 var (
-	serverPort string // Value of serverPort environment variable
-	serverPortIsSet bool
+	serverPort        string // Value of serverPort environment variable
+	serverPortIsSet   bool
 	serverPortIsValid bool
-	tlUrl, _ = url.Parse("https://www.torrentleech.org") // Used to do silly TL-specific data checks
-	jar, _ = cookiejar.New(nil) // Save cookies between requests to minimize authentication overhead
-	client = http.Client{Jar: jar}
+	tlUrl, _          = url.Parse("https://www.torrentleech.org") // Used to do silly TL-specific data checks
+	jar, _            = cookiejar.New(nil)                        // Save cookies between requests to minimize authentication overhead
+	client            = http.Client{Jar: jar}
 )
 
 // Perform data validation
@@ -39,10 +39,10 @@ func main() {
 
 	router.SetTrustedProxies(nil) // Turn off trusted proxy warning message
 
-	router.POST("/validate-url/", ValidateTorrentByUrl)   // Feels kind of stupid to serve these functions
-	router.POST("/validate-url", ValidateTorrentByUrl)    // both with and without the trailing slash but
-	router.GET("/healthcheck/", Healthcheck)              // I'm not sure if autobrr follows HTTP301s by
-	router.GET("/healthcheck", Healthcheck)               // default - too lazy to test right now and this works
+	router.POST("/validate-url/", ValidateTorrentByUrl) // Feels kind of stupid to serve these functions
+	router.POST("/validate-url", ValidateTorrentByUrl)  // both with and without the trailing slash but
+	router.GET("/healthcheck/", Healthcheck)            // I'm not sure if autobrr follows HTTP301s by
+	router.GET("/healthcheck", Healthcheck)             // default - too lazy to test right now and this works
 	// router.GET("/get-tl-cookies", getTLSessionCookies)
 
 	if serverPortIsSet && serverPortIsValid {
